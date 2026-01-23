@@ -6,22 +6,7 @@ export default defineConfig({
   base: '/lan',
   integrations: [
     starlight({
-      title: 'My Docs',
-      social: {
-        github: 'https://github.com/withastro/starlight',
-      },
-      sidebar: [
-        {
-          label: 'Guides',
-          items: [
-            { label: 'Example Guide', slug: 'guides/example' },
-          ],
-        },
-        {
-          label: 'Reference',
-          autogenerate: { directory: 'reference' },
-        },
-      ],
+      title: 'LAN/Services',
     }),
   ],
 });
