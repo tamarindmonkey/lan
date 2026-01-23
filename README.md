@@ -109,7 +109,7 @@ To prevent hairpin NAT issues and ensure valid SSL termination locally, specific
 
 ### Media Stack (Plex)
 
-- **Container Network:** `network_mode: host` (Essential for DLNA/L2 Discovery).
+- **Container Network:** `macvlan` (Essential for DLNA/L2 Discovery) and `proxy` (for other services to be able to access by docker internal DNS).
 - **ISP Bypass:**
     - **Remote Access:** Disabled in GUI to prevent UPnP/Port 32400 mapping.
     - **Custom Server URL:** Set to `https://plex.[FQDN]:443`.
