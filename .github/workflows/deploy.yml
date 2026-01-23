@@ -4,12 +4,13 @@ on:
   # Trigger on pushes to main branch
   push:
     branches: [main]
-    # Optional: only trigger when docs folder changes
+    # Only trigger when relevant files change
     paths:
-      - 'docs/**'
       - 'src/**'
+      - 'public/**'
       - 'astro.config.mjs'
       - 'package.json'
+      - 'package-lock.json'
   
   # Allow manual runs from Actions tab
   workflow_dispatch:
