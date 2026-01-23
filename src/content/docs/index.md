@@ -1,9 +1,10 @@
 ---
 title: LAN/Services
-template: splash
+description: Home network and self-hosted service documentation
 ---
 
-# lan
+# Outline
+
 Home network and self-hosted service documentation
 
 ## High-Level Architecture
