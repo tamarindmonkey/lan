@@ -136,7 +136,7 @@ To prevent hairpin NAT issues and ensure valid SSL termination locally, specific
 ### Docker compose
 
 Monolithic docker compose for all services.
-- See [docker-compose.yaml](docker-compose.yaml)
+- See [docker-compose](docker-compose)
 
 ## Client-Side Specifics
 
