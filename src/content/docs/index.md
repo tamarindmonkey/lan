@@ -30,17 +30,19 @@ The network utilizes a **Split-Horizon DNS** strategy hosted on a virtualized mi
     - Exernal/Attached Storage
         - USB 3.0 12TB WD MyBook (/dev/sda1)
     - **OS:** Debian 12 with Pxvirt (Proxmox) 8.4.10
-- **Modem:** Motorola MB8611 (DOCSIS 3.1)
+- **Modem:** NA (Verizon ONT)
 
 ### Network Switching Fabric
 
-- **Switch 1 (Living Room):** Mokerlink 8-Port 2.5Gbps Unmanaged (Model: 2G080210GS) with 2x 10Gbps SFP+ Uplinks.
+- **Switch 1 (Basement):** Mokerlink 8-Port 10Gbps Managed (Model: 10G0800GSM) with 1x nBase-T SFP+ Uplink 
+  From eth1 (LAN) of `pmx-t6`. (FS.com P/N: SFP-10GM-T-30 SKU:178039)
 - **Switch 2 (Entertainment Center):** Mokerlink 16-Port 2.5Gbps Unmanaged (Model: 2G16210GS) with 2x 10Gbps SFP+ Uplinks.
 - **Switch 3 (Office):** Mokerlink 8-Port 2.5Gbps Unmanaged (Model: 2G080210GS) with 2x 10Gbps SFP+ Uplinks.
-- **Switch 4 (Attic):** Mokerlink 5-Port 2.5Gbps Unmanaged (Model: 2G050210GS) with 2x 10Gbps SFP+ Uplinks.
+- **Switch 4 (Spare Room):** Mokerlink 8-Port 2.5Gbps Unmanaged (Model: 2G080210GS) with 2x 10Gbps SFP+ Uplinks.
+- **Switch 5 (2nd Floor):** Mokerlink 5-Port 2.5Gbps Unmanaged (Model: 2G050210GS) with 2x 10Gbps SFP+ Uplinks.
 - **Wireless APs:** 2x Ubiquiti Unifi 7 Pro
-    - Living Room
-    - Office
+  - Living Room
+  - 2nd Floor
 
 ### Smart Home
 
@@ -63,7 +65,7 @@ The NanoPC-T6 (`pmx-t6`) serves as the hypervisor host using two physical interf
 ### WAN/ISP Constraints
 
 - **Restrictions:** Inbound ports 21, 80, 143, 443 blocked; Port 32400 throttled.
-- **Connection:** Cable Modem -> NanoPC-T6 `eth0` (Passthrough to OpenWRT via `vmbr0`).
+- **Connection:** ONT -> NanoPC-T6 `eth0` (Passthrough to OpenWRT via `vmbr0`).
 
 ### LAN Backbone (2.5G / 10G)
 
@@ -71,7 +73,7 @@ The NanoPC-T6 (`pmx-t6`) serves as the hypervisor host using two physical interf
 2. **Switch Interconnects:**
     - **Switch 1 (Living Room)** `Port 2` **↔ Switch 2 (Entertainment Center)** `Port 1` (CAT6)
     - **Switch 1 (Living Room)** `SFP 1` **↔** **Switch 3 (Office)** `SFP 1` (LC/LC OM4).
-    - **Switch 1 (Living Room)** `SFP 2` **↔** **Switch 4 (Attic)** `SFP 1` (LC/LC OM4).
+    - **Switch 1 (Living Room)** `SFP 2` **↔** **Switch 4 (2nd Floor)** `SFP 1` (LC/LC OM4).
 
 ### Port Allocations
 
@@ -84,14 +86,16 @@ The NanoPC-T6 (`pmx-t6`) serves as the hypervisor host using two physical interf
 
 ### Split-Horizon Strategy
 
-To prevent hairpin NAT issues and ensure valid SSL termination locally, specific DNS records allow local clients to resolve services directly while external clients use the Cloudflare Tunnel.
+To prevent hairpin NAT issues and ensure valid SSL termination locally, specific DNS records allow
+local clients to resolve services directly while external clients use the Cloudflare Tunnel.
 
 ### Internal DNS (LAN)
 
 - **Primary:** Pi-hole (Docker on `192.168.1.3`)
-- **Configuration:** Both resolvers enforce the local IP for the domain and strip HTTPS/ECH records to prevent SSL handshake failures with Cloudflare keys.
-    - **Pi-hole Env:** `FTLCONF_misc_dnsmasq_lines="address=/[FQDN]/192.168.1.3;server=/[FQDN]/"`
-    - **OpenWRT Config:** `list address '/[FQDN]/192.168.1.3'`, `list server '/[FQDN]/'`
+- **Configuration:** Both resolvers enforce the local IP for the domain and strip HTTPS/ECH records to
+  prevent SSL handshake failures with Cloudflare keys.
+  - **Pi-hole Env:** `FTLCONF_misc_dnsmasq_lines="address=/[FQDN]/192.168.1.3;server=/[FQDN]/"`
+  - **OpenWRT Config:** `list address '/[FQDN]/192.168.1.3'`, `list server '/[FQDN]/'`
 
 ### External DNS (Cloudflare)
 
@@ -106,25 +110,25 @@ To prevent hairpin NAT issues and ensure valid SSL termination locally, specific
 ### Network Stack
 
 - **Traefik:** Reverse Proxy & Ingress Controller.
-    - **Network:** `proxy` bridge (`172.20.0.0/16`).
-    - **SSL:** Wildcard `.[FQDN]` via Let’s Encrypt DNS Challenge.
+  - **Network:** `proxy` bridge (`172.20.0.0/16`).
+  - **SSL:** Wildcard `.[FQDN]` via Let’s Encrypt DNS Challenge.
 - **Cloudflared:** Tunnel Connector.
-    - **Route:** `.[FQDN]` -> `https://traefik:443` (No TLS Verify).
+  - **Route:** `.[FQDN]` -> `https://traefik:443` (No TLS Verify).
 - **Pi-hole:** Network-wide Ad-blocking & DNS.
-    - **Network:** Fixed IP `172.20.0.10` on `proxy` net; Host ports `53:53` mapped.
+  - **Network:** Fixed IP `172.20.0.10` on `proxy` net; Host ports `53:53` mapped.
 
 ### Media Stack (Plex)
 
 - **Container Network:** `macvlan` (Essential for DLNA/L2 Discovery) and `proxy` (for other services to be able to access by docker internal DNS).
 - **ISP Bypass:**
-    - **Remote Access:** Disabled in GUI to prevent UPnP/Port 32400 mapping.
-    - **Custom Server URL:** Set to `https://plex.[FQDN]:443`.
-    - **Routing:** Traefik labels on `ubuntu-docker` configured to proxy traffic to `http://192.168.1.5:32400`.
-    - **Tunnel:** Tailscale VPN connection between 192.168.1.5 and public IPv4 of OCI VM (endpoint).
-        - Restrictive to exposing **only** one IP using `TS_EXTRA_ARGS=--advertise-routes=192.168.1.5/32 --accept-routes`
-    - External Traefik reverse proxy on OCI VM translates `http://192.168.1.5:32400` to `https://[OCI VM Public IPv4]:443/`
-    - **DNS A Record:** `plex.[FQDN]` handles resolution to `[OCI VM Public IPv4]`
-    - **Result:** External traffic routes via `https://plex.[FQDN]` (Tunnel), bypassing ISP throttling. Internal traffic routes to 192.168.1.5. Avoids breaking ToS of Cloudflare Application Tunnel (free tier).
+  - **Remote Access:** Disabled in GUI to prevent UPnP/Port 32400 mapping.
+  - **Custom Server URL:** Set to `https://plex.[FQDN]:443`.
+  - **Routing:** Traefik labels on `ubuntu-docker` configured to proxy traffic to `http://192.168.1.5:32400`.
+  - **Tunnel:** Tailscale VPN connection between 192.168.1.5 and public IPv4 of OCI VM (endpoint).
+    - Restrictive to exposing **only** one IP using `TS_EXTRA_ARGS=--advertise-routes=192.168.1.5/32 --accept-routes`
+  - External Traefik reverse proxy on OCI VM translates `http://192.168.1.5:32400` to `https://[OCI VM Public IPv4]:443/`
+  - **DNS A Record:** `plex.[FQDN]` handles resolution to `[OCI VM Public IPv4]`
+  - **Result:** External traffic routes via `https://plex.[FQDN]` (Tunnel), bypassing ISP throttling. Internal traffic routes to 192.168.1.5. Avoids breaking ToS of Cloudflare Application Tunnel (free tier).
 
 ### Authentication
 
@@ -143,8 +147,8 @@ Monolithic docker compose for all services.
 ### Browser VPN Extensions
 
 - **Configuration:** “Split Tunneling” or “Bypass List” must be configured in the extension to avoid external resolution via Cloudflare Application Tunnel.
-    - **Bypass Rule 1:** `192.168.1.0/24` (Local Subnet)
-    - **Bypass Rule 2:** `.[FQDN]` (Local Domain)
+  - **Bypass Rule 1:** `192.168.1.0/24` (Local Subnet)
+  - **Bypass Rule 2:** `.[FQDN]` (Local Domain)
 
 ### Home Assistant
 
