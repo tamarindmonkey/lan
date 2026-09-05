@@ -14,27 +14,27 @@ The network utilizes a **Split-Horizon DNS** strategy hosted on a virtualized mi
 - **WAN Ingress:** Cloudflare Tunnel (No inbound ports open).
 - **LAN Routing:** Direct IP resolution via local authoritative DNS.
 - **Virtualization:** Proxmox VE
-    - Privileged LXC for OpenWRT.
-    - VM (using all 4 A76 cores) for a docker host to run a monolithic compose with all services.
+  - Privileged LXC for OpenWRT.
+  - VM (using all 4 A76 cores) for a docker host to run a monolithic compose with all services.
 
 ## Hardware Inventory
 
 ### Core Compute & Routing
 
 - **Host Device:** FriendlyARM NanoPC T6
-    - **SoC:** Rockchip RK3588
-    - **Interfaces:** 2x 2.5Gbps RJ45, NVMe, m.2 WiFi/BT slots
-    - Internal Storage
-        - 256GB eMMC (/dev/mmcblk0)
-        - 256GB Samsung PM961 - PCIe 3.0 x4 m.2 NVME (/dev/nvme0)
-    - Exernal/Attached Storage
-        - USB 3.0 12TB WD MyBook (/dev/sda1)
-    - **OS:** Debian 12 with Pxvirt (Proxmox) 8.4.10
+  - **SoC:** Rockchip RK3588
+  - **Interfaces:** 2x 2.5Gbps RJ45, NVMe, m.2 WiFi/BT slots
+  - Internal Storage
+    - 256GB eMMC (/dev/mmcblk0)
+    - 256GB Samsung PM961 - PCIe 3.0 x4 m.2 NVME (/dev/nvme0)
+  - Exernal/Attached Storage
+    - USB 3.0 12TB WD MyBook (/dev/sda1)
+  - **OS:** Debian 12 with Pxvirt (Proxmox) 8.4.10
 - **Modem:** NA (Verizon ONT)
 
 ### Network Switching Fabric
 
-- **Switch 1 (Basement):** Mokerlink 8-Port 10Gbps Managed (Model: 10G0800GSM) with 1x nBase-T SFP+ Uplink 
+- **Switch 1 (Basement):** Mokerlink 8-Port 10Gbps Managed (Model: 10G0800GSM) with 1x nBase-T SFP+ Uplink
   From eth1 (LAN) of `pmx-t6`. (FS.com P/N: SFP-10GM-T-30 SKU:178039)
 - **Switch 2 (Entertainment Center):** Mokerlink 16-Port 2.5Gbps Unmanaged (Model: 2G16210GS) with 2x 10Gbps SFP+ Uplinks.
 - **Switch 3 (Office):** Mokerlink 8-Port 2.5Gbps Unmanaged (Model: 2G080210GS) with 2x 10Gbps SFP+ Uplinks.
@@ -100,7 +100,7 @@ local clients to resolve services directly while external clients use the Cloudf
 ### External DNS (Cloudflare)
 
 - **Record:** `[FQDN]` (CNAME) → `[Tunnel UUID].cfargotunnel.com`.
-    - *Note: Cannot use A record for a tunnel, must be IPv4.*
+  - *Note: Cannot use A record for a tunnel, must be IPv4.*
 - **Record:** `*.[FQDN]` (CNAME) → `[Tunnel UUID].cfargotunnel.com`.
 - **Record:** `plex.[FQDN]` (A) → `Public IPv4 address of Oracle Cloud Infra VM` (Tailscale tunnel endpoint and Traefik reverse proxy).
 - **Proxy Status:** Proxied (Orange Cloud).
@@ -140,6 +140,7 @@ local clients to resolve services directly while external clients use the Cloudf
 ### Docker compose
 
 Monolithic docker compose for all services.
+
 - See [docker-compose](docker-compose)
 
 ## Client-Side Specifics
