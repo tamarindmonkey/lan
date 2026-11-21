@@ -40,6 +40,7 @@ PACKAGES=(
     "ca-certificates"
     "curl"
     "iptables-persistent"
+    "net-tools"
     "vim"
     "unzip"
     "zip"

@@ -1,0 +1,31 @@
+# Sony / PlayStation Update & Telemetry Blocklist (Pi-hole ABP Wildcard Format)
+# Pair with one Pi-hole RegEx rule (Sony group): playstation\.(net|com|org)\.
+
+# Core PlayStation & Sony Root Domains
+||playstation.com^
+||playstation.net^
+||playstation.org^
+||sonyentertainmentnetwork.com^
+||sonynetworkentertainment.com^
+||psndl.net^
+||sony.com^
+||sony.net^
+||scea.com^
+||scee.com^
+||scej.jp^
+||scei.co.jp^
+||sie-rd.com^
+
+# Sony-Specific CDN CNAME Targets (Akamai GTM & Limelight)
+||sony.akadns.net^
+||psn.akadns.net^
+||sonycoment.loris-e.llnwd.net^
+||sonycoment.vo.llnwd.net^
+||sonygst.s.llnwi.net^
+||sonybivstatic-a.akamaihd.net^
+
+# Sony Telemetry / Metadata
+||ndmdhs.com^
+
+# Optional: Shared Akamai edge node at the end of Sony's update CNAME chain.
+||a192.d.akamai.net^
